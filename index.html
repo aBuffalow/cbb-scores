@@ -906,7 +906,7 @@
     <h1>College Basketball Scores</h1>
     <div class="controls">
       <button id="compactToggle" title="Tighter cards to see more games at once">Compact</button>
-      <button id="watchableToggle" title="Sort live games: late & close first, then upsets, then quality matchups">Watchable sort</button>
+      <button id="watchableToggle" title="Sort live games: late & close, upsets, BPI quality (full D1)">Watchable sort</button>
       <button id="wakeToggle" title="Keep the screen on (prevent dim / sleep)">Stay awake</button>
       <button id="refresh" title="Refresh now">↻ Refresh</button>
       <div class="status-bar">
@@ -1070,8 +1070,9 @@
       return { text, cls: state, startingSoon };
     }
 
+    const BPI_RANK = {"2":23,"5":124,"6":233,"8":21,"9":68,"12":6,"13":186,"16":179,"21":79,"23":205,"24":72,"25":97,"26":18,"27":236,"28":90,"30":49,"36":63,"38":74,"41":7,"43":105,"44":182,"45":116,"46":94,"47":180,"48":267,"50":338,"52":86,"55":221,"56":277,"57":2,"58":101,"59":119,"61":46,"62":151,"66":3,"68":77,"70":261,"71":163,"77":69,"79":166,"82":92,"84":38,"85":339,"87":71,"91":288,"93":115,"94":208,"96":17,"97":16,"98":127,"99":91,"103":102,"104":274,"107":341,"108":142,"111":270,"113":177,"116":292,"119":173,"120":54,"127":12,"130":25,"135":83,"139":55,"140":265,"142":50,"145":44,"147":114,"149":187,"150":1,"151":199,"152":37,"153":40,"154":85,"155":298,"156":34,"158":19,"159":302,"160":335,"161":325,"163":129,"164":82,"166":139,"167":65,"171":170,"172":158,"179":200,"183":80,"189":204,"193":109,"194":27,"195":154,"197":43,"198":254,"201":22,"202":108,"204":113,"213":88,"218":125,"219":118,"221":73,"222":45,"225":225,"227":144,"228":41,"231":136,"232":106,"233":278,"235":67,"236":229,"238":26,"239":31,"242":209,"245":39,"248":11,"249":96,"250":263,"251":9,"252":20,"253":257,"254":78,"256":172,"257":123,"258":32,"259":56,"261":193,"264":64,"265":149,"269":29,"270":237,"275":33,"276":192,"277":48,"278":214,"279":218,"282":175,"284":349,"288":146,"290":285,"292":244,"294":250,"295":251,"299":268,"300":98,"301":212,"302":171,"304":300,"305":84,"309":220,"311":322,"314":201,"315":329,"322":331,"324":260,"325":289,"326":126,"328":60,"331":145,"333":14,"338":135,"339":297,"344":58,"349":330,"350":133,"356":4,"357":185,"399":311,"526":273,"2000":264,"2005":334,"2006":103,"2010":337,"2011":358,"2016":352,"2026":196,"2029":357,"2031":222,"2032":178,"2046":169,"2050":191,"2057":130,"2065":255,"2066":345,"2083":327,"2084":213,"2086":99,"2097":286,"2099":348,"2110":202,"2115":299,"2116":87,"2117":293,"2127":303,"2130":347,"2132":24,"2142":164,"2154":364,"2166":117,"2168":70,"2169":362,"2172":247,"2174":281,"2181":107,"2182":223,"2184":138,"2193":150,"2197":350,"2198":262,"2199":235,"2210":245,"2217":183,"2226":111,"2229":190,"2230":122,"2239":258,"2241":354,"2244":95,"2247":239,"2250":13,"2253":35,"2261":279,"2272":52,"2275":143,"2277":308,"2287":104,"2294":36,"2296":355,"2305":15,"2306":89,"2309":120,"2320":284,"2325":197,"2329":266,"2330":319,"2335":131,"2344":230,"2348":210,"2349":275,"2350":160,"2351":132,"2352":328,"2363":336,"2368":242,"2377":100,"2378":269,"2379":360,"2382":224,"2385":313,"2390":10,"2393":167,"2400":365,"2405":184,"2413":296,"2415":356,"2426":215,"2427":246,"2428":340,"2429":152,"2430":206,"2433":359,"2437":252,"2439":75,"2440":61,"2441":344,"2443":301,"2447":280,"2448":312,"2449":165,"2450":276,"2453":316,"2454":306,"2458":161,"2459":318,"2460":137,"2463":194,"2464":304,"2466":305,"2473":198,"2483":57,"2492":181,"2501":234,"2502":240,"2504":332,"2506":241,"2507":53,"2509":28,"2514":238,"2515":217,"2520":353,"2523":157,"2529":294,"2534":153,"2535":159,"2539":140,"2540":110,"2541":81,"2545":283,"2546":271,"2547":121,"2550":66,"2561":291,"2565":249,"2567":62,"2569":346,"2571":174,"2572":231,"2579":93,"2582":295,"2599":30,"2603":134,"2608":59,"2612":290,"2617":148,"2619":259,"2623":248,"2627":188,"2628":47,"2630":282,"2633":5,"2634":227,"2635":287,"2636":256,"2638":195,"2640":320,"2641":8,"2643":351,"2649":141,"2653":155,"2655":176,"2670":42,"2674":162,"2678":321,"2681":342,"2692":272,"2697":363,"2698":333,"2710":361,"2711":168,"2717":203,"2724":76,"2729":243,"2737":207,"2739":232,"2747":253,"2750":147,"2751":128,"2752":51,"2754":226,"2755":315,"2771":219,"2803":314,"2837":307,"2856":216,"2870":228,"2885":343,"2900":156,"2908":324,"2916":310,"2934":309,"3084":112,"3101":211,"112358":317};
+
     function parseClockMinutes(status) {
-      // "5:57 - 2nd Half" / "0:34 - 2nd Half" / "Halftime" / "End of 1st Half"
       const detail = status?.type?.detail || status?.type?.shortDetail || "";
       if (/halftime|end of/i.test(detail)) return 0;
       const m = detail.match(/(\d+):(\d+)/);
@@ -1079,10 +1080,15 @@
       return parseInt(m[1], 10) + parseInt(m[2], 10) / 60;
     }
 
+    /** BPI rank 1 = best; missing → 250 (below avg D1). curatedRank only covers top 25. */
     function teamRank(competitor) {
+      const tid = String(competitor?.team?.id || "");
+      if (tid && Object.prototype.hasOwnProperty.call(BPI_RANK, tid)) {
+        return BPI_RANK[tid];
+      }
       const r = competitor?.curatedRank?.current;
-      if (r == null || r <= 0) return 99;
-      return r;
+      if (r != null && r > 0 && r < 90) return r;
+      return 250;
     }
 
     function watchableScore(event) {
@@ -1093,9 +1099,9 @@
       if (scores.some(n => Number.isNaN(n))) return 0;
 
       const margin = Math.abs(scores[0] - scores[1]);
-      const period = comp.status?.period || 0; // 1 = 1st half, 2 = 2nd, 3+ = OT
+      const period = comp.status?.period || 0;
       const minsLeft = parseClockMinutes(comp.status);
-      const ranks = comps.map(teamRank); // lower = better; 99 = unranked
+      const ranks = comps.map(teamRank);
       const r0 = ranks[0], r1 = ranks[1];
       const betterRank = Math.min(r0, r1);
       const worseRank = Math.max(r0, r1);
@@ -1104,25 +1110,23 @@
       const betterScore = scores[betterIdx];
       const worseScore = scores[worseIdx];
       const underdogLeads = worseScore > betterScore;
-      const underdogClose = worseScore >= betterScore - 5; // within 5 or ahead
+      const underdogClose = worseScore >= betterScore - 5;
+      const rankGap = worseRank - betterRank;
 
       let score = 0;
 
       // --- Closeness: strongly scaled by how late it is ---
-      // 1st half close games get modest credit; 2nd half / OT get the big boosts
       const closePts = Math.max(0, 26 - margin * 2.2);
       if (period <= 1) {
         score += closePts * 0.3;
       } else if (period === 2) {
         score += closePts;
-        // Late-game multipliers
         if (minsLeft != null) {
           if (minsLeft <= 10) score += 8;
           if (minsLeft <= 6) score += 10;
           if (minsLeft <= 3) score += 12;
           if (minsLeft <= 1) score += 8;
         } else {
-          // period known but clock unknown — still treat 2nd half as more important
           score += 6;
         }
         if (margin <= 8) score += 8;
@@ -1130,58 +1134,60 @@
         if (margin <= 2) score += 14;
         if (margin === 0) score += 6;
       } else if (period >= 3) {
-        // Overtime is almost always must-watch
         score += closePts + 28;
         if (margin <= 5) score += 10;
         if (margin <= 2) score += 12;
       }
 
-      // --- Quality of teams (ESPN curated rank; 99 = unranked) ---
-      // Prefer games involving better teams, and especially evenly matched good teams
-      for (const r of ranks) {
-        if (r <= 25) score += Math.max(0, 13 - r * 0.38);
-        else if (r <= 50) score += 2;
+      // --- Quality via full BPI ranks (1 best … ~360 worst) ---
+      // Continuous decay so #30 mid-major ≠ #300, and #40 power-6 ≠ #200
+      function qualityFromRank(r) {
+        if (r <= 10) return 14;
+        if (r <= 25) return 11;
+        if (r <= 40) return 8;
+        if (r <= 60) return 6;
+        if (r <= 80) return 4.5;
+        if (r <= 100) return 3.5;
+        if (r <= 150) return 2;
+        if (r <= 200) return 1;
+        return 0.25;
       }
-      if (betterRank <= 25 && worseRank <= 25) {
-        score += 16; // ranked vs ranked
-        const rankGap = worseRank - betterRank;
-        if (rankGap <= 8) score += 10; // similar-tier ranked matchup
-        if (rankGap <= 4) score += 6;
-      } else if (betterRank <= 10 && worseRank <= 25) {
-        score += 8;
-      } else if (betterRank <= 25) {
-        score += 3; // at least one ranked side
-      }
+      score += qualityFromRank(r0) + qualityFromRank(r1);
 
-      // --- Upset / underdog drama ---
-      // Big when a clearly worse team is leading or hanging around late
-      const rankGap = worseRank - betterRank;
-      if (rankGap >= 15 && underdogClose) {
+      // Evenly matched good-to-solid games (mid-majors included)
+      const avgRank = (r0 + r1) / 2;
+      if (rankGap <= 25 && avgRank <= 80) score += 12;
+      else if (rankGap <= 35 && avgRank <= 120) score += 8;
+      else if (rankGap <= 20 && avgRank <= 150) score += 5;
+      if (betterRank <= 50 && worseRank <= 50) score += 10;
+      else if (betterRank <= 75 && worseRank <= 75) score += 6;
+      else if (betterRank <= 100 && worseRank <= 100) score += 3;
+
+      // --- Upset / underdog drama using BPI gap ---
+      if (rankGap >= 40 && underdogClose) {
         let upset = 0;
         if (underdogLeads) upset += 18;
-        else upset += 8; // within 5
+        else upset += 8;
         if (period >= 2) upset += 12;
         if (period >= 3) upset += 8;
         if (minsLeft != null && period === 2 && minsLeft <= 8) upset += 10;
-        // Bigger gap = bigger story (e.g. unranked vs top-5)
-        if (rankGap >= 40) upset += 8;
-        if (rankGap >= 70) upset += 6;
-        if (betterRank <= 10) upset += 6;
+        if (rankGap >= 80) upset += 8;
+        if (rankGap >= 150) upset += 6;
+        if (betterRank <= 25) upset += 6;
+        if (betterRank <= 10) upset += 4;
         score += upset;
       }
 
-      // --- Win probability drama (when ESPN sends it) ---
+      // --- Win probability drama ---
       const prob = comp.situation?.lastPlay?.probability;
       if (prob && period >= 2) {
         const hp = prob.homeWinPercentage;
         const ap = prob.awayWinPercentage;
         if (hp != null && ap != null) {
           const leader = Math.max(hp, ap);
-          // Coin-flip late = great TV
           if (leader < 0.62) score += 14;
           else if (leader < 0.75) score += 7;
-          // Favorite is sweating (favorite by rank but win% modest)
-          if (betterRank <= 25 && underdogClose && leader < 0.7) score += 8;
+          if (betterRank <= 80 && underdogClose && leader < 0.7) score += 8;
         }
       }
 
@@ -2083,8 +2089,8 @@
       if (!watchableToggle) return;
       watchableToggle.classList.toggle("toggle-on", watchableSortOn);
       watchableToggle.title = watchableSortOn
-        ? "Watchable sort is ON — late close games, upsets, quality matchups"
-        : "Sort live games: late & close first, then upsets, then quality matchups";
+        ? "Watchable sort is ON — late close, upsets, BPI quality (full D1)"
+        : "Sort live games: late & close, upsets, BPI quality (full D1)";
       watchableToggle.textContent = watchableSortOn ? "Watchable sort · On" : "Watchable sort";
     }
     syncWatchableToggle();
