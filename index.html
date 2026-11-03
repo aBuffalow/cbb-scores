@@ -1475,28 +1475,32 @@
 
     function situationHtml(situation, competitors) {
       if (!situation) return "";
-      // Basketball: show possession when available; foul/bonus text if ESPN sends it
-      const possId = situation.possession;
-      let possAbbr = "";
-      if (possId && competitors) {
-        const team = competitors.find(c => String(c.team?.id) === String(possId));
-        if (team) possAbbr = team.team?.abbreviation || "";
-      }
+      // Only show a situation strip for real game-state (bonus), not play types like "Personal Foul"
+      // — those already appear in the last-play line and were making cards uneven heights.
       const parts = [];
-      // Some feeds include foul / bonus style text in these fields
-      const foulText = situation.downDistanceText || situation.shortDownDistanceText || situation.possessionText || "";
-      if (foulText && !/down|yard|&/i.test(foulText)) parts.push(foulText);
-      // lastPlay type can hint at free throws / bonus
-      const lp = situation.lastPlay;
-      if (lp?.type?.text && /free throw|bonus|foul/i.test(lp.type.text) && !parts.length) {
-        parts.push(lp.type.text);
+      const candidates = [
+        situation.downDistanceText,
+        situation.shortDownDistanceText,
+        situation.possessionText
+      ].filter(Boolean);
+      for (const t of candidates) {
+        const s = String(t);
+        // Skip football leftovers and raw play-type labels
+        if (/down|yard|&/i.test(s)) continue;
+        if (/foul|free\s*throw|turnover|rebound|makes |misses |timeout/i.test(s)) continue;
+        if (/personal\s*foul|shooting\s*foul|offensive\s*foul/i.test(s)) continue;
+        parts.push(s);
       }
-      if (!parts.length && !possAbbr) return "";
+      // Explicit bonus only (not "Personal Foul" play type)
+      const lpType = situation.lastPlay?.type?.text || "";
+      if (/\bbonus\b/i.test(lpType) && !/foul/i.test(lpType)) {
+        parts.push(lpType);
+      }
+      if (!parts.length) return "";
       const isBonus = parts.some(t => /bonus/i.test(t));
       return `
         <div class="situation ${isBonus ? "redzone" : ""}">
-          ${possAbbr ? `<span class="ball">● ${possAbbr}</span>` : ""}
-          ${parts.length ? `<span>${parts.join(" · ")}</span>` : ""}
+          <span>${parts.join(" · ")}</span>
         </div>
       `;
     }
