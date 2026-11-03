@@ -257,9 +257,56 @@
       gap: 8px;
     }
 
+    .card.expanded .expanded-panel,
     .grid:has(> .card:only-child) .expanded-panel,
     .grid:has(> .card:nth-child(1):nth-last-child(2)) .expanded-panel {
       display: flex;
+    }
+
+    .expand-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: auto;
+    }
+    .expand-btn:hover {
+      color: var(--text);
+      border-color: var(--border);
+      background: var(--card-hover);
+    }
+    .expand-btn .chev {
+      display: inline-block;
+      transition: transform 0.15s ease;
+      font-size: 0.65rem;
+    }
+    .card.expanded .expand-btn .chev {
+      transform: rotate(180deg);
+    }
+    .card.expanded .expand-btn {
+      color: var(--accent);
+    }
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      color: var(--muted);
+      gap: 8px;
+      margin-top: 1px;
+    }
+    .footer-row .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-left: auto;
     }
 
     .half-table {
@@ -865,7 +912,14 @@
       margin-top: 0;
     }
     body.compact .expanded-panel {
-      display: none !important;
+      display: none;
+    }
+    body.compact .card.expanded .expanded-panel {
+      display: flex;
+    }
+    body.compact .expand-btn {
+      font-size: 0.7rem;
+      padding: 1px 6px;
     }
     body.compact .section-title {
       font-size: 0.72rem;
@@ -1675,7 +1729,12 @@
           </div>
           <div class="footer-row">
             <span class="spread">${spread ? `<span class="fav">${spread}</span>` : ""}</span>
-            <a class="cast-link" href="${linkHref}" target="_blank" rel="noopener">${linkLabel} →</a>
+            <div class="footer-right">
+              <a class="cast-link" href="${linkHref}" target="_blank" rel="noopener">${linkLabel} →</a>
+              <button type="button" class="expand-btn" aria-expanded="false" aria-label="Show more details" title="Show more details">
+                Details <span class="chev">▼</span>
+              </button>
+            </div>
           </div>
           ${expandedPanelHtml(event, competitors, situation, isLive, isFinal)}
         </article>
@@ -2198,14 +2257,32 @@
       showAllHidden();
     });
 
-    // Event delegation for hide buttons (works for new + updated cards)
+    // Event delegation for hide + expand buttons
     content.addEventListener("click", (e) => {
-      const btn = e.target.closest(".hide-btn");
-      if (!btn) return;
-      e.preventDefault();
-      e.stopPropagation();
-      const id = btn.getAttribute("data-hide");
-      if (id) hideGame(id);
+      const hideBtn = e.target.closest(".hide-btn");
+      if (hideBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const id = hideBtn.getAttribute("data-hide");
+        if (id) hideGame(id);
+        return;
+      }
+      const expBtn = e.target.closest(".expand-btn");
+      if (expBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const card = expBtn.closest(".card");
+        if (!card) return;
+        const open = card.classList.toggle("expanded");
+        expBtn.setAttribute("aria-expanded", open ? "true" : "false");
+        expBtn.title = open ? "Hide details" : "Show more details";
+        expBtn.setAttribute("aria-label", open ? "Hide details" : "Show more details");
+        // keep the chevron + label in sync
+        expBtn.innerHTML = open
+          ? `Details <span class="chev">▼</span>`
+          : `Details <span class="chev">▼</span>`;
+        return;
+      }
     });
 
     updateHiddenBar();
