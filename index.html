@@ -622,10 +622,18 @@
       border-radius: 5px;
       padding: 4px 8px;
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: center;
       gap: 6px;
       line-height: 1.35;
+      min-height: 1.55em;
+      overflow: hidden;
+    }
+    .situation > span:last-child {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
     }
 
     .situation.redzone {
@@ -636,6 +644,14 @@
     .situation .ball {
       color: var(--poss);
       font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .live-extras {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-height: 0;
     }
 
 
@@ -733,13 +749,13 @@
     }
 
     .last-play {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       color: var(--muted);
-      line-height: 1.35;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
+      line-height: 1.3;
+      margin-top: 2px;
+      white-space: nowrap;
       overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .last-play strong {
